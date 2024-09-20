@@ -9,7 +9,7 @@ The Inventory System is a RESTful API built using Golang, designed to manage pro
 ## Prerequisites
 - [Golang](https://golang.org/doc/install) v1.18 or higher
 - [MySQL](https://dev.mysql.com/downloads/mysql/) or any other SQL-based database
-- [Cloudinary](https://cloudinary.com/) account to store product photos in the cloud
+- [Cloudinary](https://cloudinary.com/) account to store product images in the cloud
 
 ## Instalation
 1. Clone the repository:
