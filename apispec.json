@@ -1,0 +1,1001 @@
+{
+    "openapi":"3.0.3",
+    "info": {
+      "title":"Inventory System RESTful API",
+      "description": "API Spec for Inventory System RESTful API",
+      "version":"1.0"
+    },
+    "servers": [
+      {"url":"https://localhost:3000/api"}
+    ],
+    "paths": {
+        "/auth/login":{
+            "post":{
+                "tags":["Auth API"],
+                "description": "Login with JWT authentication",
+                "summary": "Login",
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "email":{
+                                        "type": "string"
+                                    },
+                                    "password":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Login succes",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type":"object",
+                                            "properties": {
+                                                "token":{
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/profile":{
+            "get":{
+                "tags": ["Auth API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Get profile account information",
+                "summary": "Profile",
+                "responses": {
+                    "200":{
+                        "description": "Success get profile account information",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/UserResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put":{
+                "tags": ["Auth API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update profile account information",
+                "summary": "Update Profile",
+                "requestBody":{
+                    "description": "at least there must be 1 updated",
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "$ref": "#/components/schemas/UpdateAccount"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success update profile account information",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/UserResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/profile/change-password":{
+            "put":{
+                "tags": ["Auth API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update password account ",
+                "summary": "Update password",
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "password":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success update password account",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/superadmin/admins":{
+            "get":{
+                "tags": ["Super Admin API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Find all admin accounts",
+                "summary": "Find all admin accounts",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Status admint account (active/inactive)",
+                        "schema":{
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Name of admint account",
+                        "schema":{
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success find all admin accounts",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/UserResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post":{
+                "tags": ["Super Admin API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Create admin accounts",
+                "summary": "Create admin account",
+                "requestBody":{
+                    "content":{
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "name":{
+                                        "type": "string"
+                                    },
+                                    "email":{
+                                        "type": "string"
+                                    },
+                                    "password":{
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Admin account created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/UserResponse"
+                                        }
+                                    }       
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/superadmin/admins/{id}":{
+            "get":{
+                "tags": ["Super Admin API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Find admin accounts by id",
+                "summary": "Find admin accounts by id",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdminId"
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "Success get admin account information by id",
+                        "content": {
+                            "application/json":{
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/UserResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put":{
+                "tags": ["Super Admin API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update admin accounts by id",
+                "summary": "Update admin accounts by id",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdminId"
+                    }
+                ],
+                "requestBody": {
+                    "description": "at least there must be 1 updated",
+                    "content": {
+                        "application/json": {
+                            "schema":{
+                                "$ref": "#/components/schemas/UpdateAccount"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success update admin account information by id",
+                        "content": {
+                            "application/json":{
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/UserResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/superadmin/admins/{id}/deactive":{
+            "put":{
+                "tags": ["Super Admin API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update admin accounts by id",
+                "summary": "Update admin accounts by id",
+                "parameters": [
+                    {
+                        "$ref": "#/components/parameters/AdminId"
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "Success unactivated admin account",
+                        "content": {
+                            "application/json":{
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/UserResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }         
+            }
+        },
+        "/products":{
+            "post":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Create product",
+                "summary": "Create product",
+                "requestBody":{
+                    "description": "Expired_date is optional",
+                    "content": {
+                        "multipart/form-data": {
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "sku":{
+                                        "type": "string"
+                                    },
+                                    "product_name":{
+                                        "type": "string"
+                                    },
+                                    "product_brand":{
+                                        "type": "string"
+                                    },
+                                    "category":{
+                                        "type": "string"
+                                    },
+                                    "price":{
+                                        "type": "number"
+                                    },
+                                    "stock_amount":{
+                                        "type": "number"
+                                    },
+                                    "expired_date":{
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "description": "op"
+                                    },
+                                    "Image":{
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Product created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema":{
+                                   "type": "object",
+                                   "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/ProductResponse"
+                                        }
+                                   }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Find all product information",
+                "summary": "Find all product",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "name",
+                        "description": "Product name",
+                        "schema":{
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200":{
+                        "description": "Success find all products",
+                        "content": {
+                            "application/json": {
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "array",
+                                            "items":{
+                                                "$ref": "#/components/schemas/ProductResponse"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{sku}":{
+            "get":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Find product information by SKU",
+                "summary": "Find product by SKU",
+                "parameters": [{
+                    "$ref": "#/components/parameters/sku"
+                }],
+                "responses": {
+                    "200":{
+                        "description": "Success find product",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/ProductResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update product information by SKU",
+                "summary": "Update product by SKU",
+                "parameters": [{
+                    "$ref": "#/components/parameters/sku"
+                }],
+                "requestBody":{
+                    "description": "at least there must be 1 updated",
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "product_name":{
+                                        "type": "string"
+                                    },
+                                    "product_brand":{
+                                        "type": "string"
+                                    },
+                                    "category":{
+                                        "type": "string"
+                                    },
+                                    "price":{
+                                        "type": "number"
+                                    },
+                                    "stock_amount":{
+                                        "type": "number"
+                                    },
+                                    "expired_date":{
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "description": "op"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success update product",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/ProductResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }                
+            },
+            "delete":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Delete product information by SKU (only super admin can do this)",
+                "summary": "Delete product by SKU",
+                "parameters": [{
+                    "$ref": "#/components/parameters/sku"
+                }],
+                "responses": {
+                    "200":{
+                        "description": "Success update product",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } 
+            }
+        },
+        "/products/{sku}/out":{
+            "put":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update product out by SKU",
+                "summary": "Update product out",
+                "parameters": [{
+                    "$ref": "#/components/parameters/sku"
+                }],
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "stock_amount":{
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success update product out",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/ProductResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } 
+            }
+        },
+        "/products/{sku}/in":{
+            "put":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update product in by SKU",
+                "summary": "Update product in",
+                "parameters": [{
+                    "$ref": "#/components/parameters/sku"
+                }],
+                "requestBody":{
+                    "content": {
+                        "application/json":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "stock_amount":{
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success update product in",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/ProductResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } 
+            }
+        },
+        "/products/{sku}/change-img":{
+            "put":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Update product image by SKU",
+                "summary": "Update product image",
+                "parameters": [{
+                    "$ref": "#/components/parameters/sku"
+                }],
+                "requestBody":{
+                    "content": {
+                        "multipart/form-data":{
+                            "schema":{
+                                "type": "object",
+                                "properties": {
+                                    "Image":{
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success update product image",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/ProductResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }      
+            }
+        },
+        "/products/{sku}/reset-expdate":{
+            "put":{
+                "tags": ["Products API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Reset product expiration date by SKU",
+                "summary": "Reset product expiration date",
+                "parameters": [{
+                    "$ref": "#/components/parameters/sku"
+                }],
+                "responses": {
+                    "200":{
+                        "description": "Success reset expiration date product",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "$ref": "#/components/schemas/ProductResponse"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/logs":{
+            "get":{
+                "tags": ["Logs API"],
+                "security": [{
+                    "bearerAuth":[]
+                }],
+                "description": "Find all log activity (only super admin can do this)",
+                "summary": "Find all product",
+                "responses": {
+                    "200": {
+                        "description": "Success find all log activity",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "code":{
+                                            "type": "number"
+                                        },
+                                        "status":{
+                                            "type": "string"
+                                        },
+                                        "data":{
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "id": {"type": "number"},
+                                                    "admin_id":{"type": "string"},
+                                                    "message":{"type": "string"},
+                                                    "time":{
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "parameters": {
+            "AdminId":{
+                "name": "id",
+                "description": "Admin id",
+                "in": "path",
+                "schema":{
+                    "type": "string"
+                },
+                "required": true
+            },
+            "sku":{
+                "name": "sku",
+                "description": "Product SKU",
+                "schema":{
+                    "type": "string"
+                },
+                "in": "path",
+                "required": true
+            }
+        },
+        "schemas": {
+            "UserResponse":{
+                "type": "object",
+                "properties": {
+                    "id":{
+                        "type": "string"
+                    },
+                    "name":{
+                        "type": "string"
+                    },
+                    "email":{
+                        "type": "string"
+                    },
+                    "role":{
+                        "type": "string"
+                    },
+                    "status":{
+                        "type": "string"
+                    },
+                    "created_at":{
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at":{
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "ProductResponse":{
+                "type": "object",
+                "properties": {
+                    "sku":{
+                        "type": "string"
+                    },
+                    "product_name":{
+                        "type": "string"
+                    },
+                    "product_brand":{
+                        "type": "string"
+                    },
+                    "price":{
+                        "type": "number"
+                    },
+                    "image_url":{
+                        "type": "string"
+                    },
+                    "stock_amount":{
+                        "type": "integer"
+                    },
+                    "created_at":{
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at":{
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                }
+            },
+            "UpdateAccount":{
+                "type": "object",
+                "properties": {
+                    "name":{
+                        "type": "string"
+                    },
+                    "email":{
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth":{
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [{
+        "bearerAuth":[]
+    }]
+}
