@@ -37,6 +37,12 @@ func (service *ProductsServiceImpl) CreateProductService(ctx context.Context, re
 
 	imageUrl := helper.UploadImage(ctx, service.cld, file, fileHeader)
 
+	var expDate *time.Time
+
+	if request.ExpiredDate != nil {
+		expDate = request.ExpiredDate
+	}
+
 	product := domain.Products{
 		SKU:      request.SKU,
 		Name:     request.Name,
@@ -44,23 +50,17 @@ func (service *ProductsServiceImpl) CreateProductService(ctx context.Context, re
 		Category: request.Category,
 		ImageUrl: imageUrl,
 		Price:    request.Price,
+		Amount: request.Amount,
+		ExpiredDate: expDate,
 	}
 
 	product = service.ProductsRepository.Create(ctx, tx, product)
-
-	var expDate *time.Time
-
-	if request.ExpiredDate != nil {
-		expDate = request.ExpiredDate
-	}
 
 	stock := domain.ProductStock{
 		SKU:         request.SKU,
 		Amount:      request.Amount,
 		ExpiredDate: expDate,
 	}
-
-	stock = service.StockRepository.Create(ctx, tx, stock)
 
 	return helper.ToProductResponse(product, stock)
 }
@@ -72,20 +72,15 @@ func (service *ProductsServiceImpl) FindAllService(ctx context.Context) []web.Pr
 
 	products := service.ProductsRepository.FindAll(ctx, tx)
 
-	stocks := service.StockRepository.FindAll(ctx, tx)
-	stockMap := make(map[string]domain.ProductStock)
-	for _, stock := range stocks {
-		stockMap[stock.SKU] = stock
+	stock := domain.ProductStock{
+		SKU:         "",
+		Amount:      0,
+		ExpiredDate: nil,
 	}
 
 	var productResponses []web.ProductResponse
 
 	for _, product := range products {
-		stock, exist := stockMap[product.SKU]
-		if !exist {
-			panic(exception.NewBadReqErr("Error"))
-		}
-
 		productResponse := helper.ToProductResponse(product, stock)
 		productResponses = append(productResponses, productResponse)
 	}
@@ -141,22 +136,19 @@ func (service *ProductsServiceImpl) UpdateProductService(ctx context.Context, re
 		product.Price = request.Price
 	}
 
+	if request.Amount != 0 {
+		product.Amount = request.Amount
+	}
+
+	if request.ExpiredDate != nil {
+		product.ExpiredDate = request.ExpiredDate
+	}
 	product = service.ProductsRepository.Update(ctx, tx, product)
 
 	stock, err := service.StockRepository.FindBySKU(ctx, tx, request.SKU)
 	if err != nil {
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
-
-	if request.Amount != 0 {
-		stock.Amount = request.Amount
-	}
-
-	if request.ExpiredDate != nil {
-		stock.ExpiredDate = request.ExpiredDate
-	}
-
-	stock = service.StockRepository.Update(ctx, tx, stock)
 
 	return helper.ToProductResponse(product, stock)
 }
@@ -176,13 +168,13 @@ func (service *ProductsServiceImpl) StockOutService(ctx context.Context, request
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
 
-	if request.Amount > stock.Amount {
+	if request.Amount > product.Amount {
 		panic(exception.NewBadReqErr("the limit amount issued from stock is 0"))
 	}
 
-	stock.Amount = -request.Amount
+	product.Amount = -request.Amount
 
-	stock = service.StockRepository.StockOut(ctx, tx, stock)
+	product = service.StockRepository.StockOut(ctx, tx, product)
 
 	return helper.ToProductResponse(product, stock)
 }
@@ -202,9 +194,9 @@ func (service *ProductsServiceImpl) StockInService(ctx context.Context, request 
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
 
-	stock.Amount = request.Amount
+	product.Amount = request.Amount
 
-	stock = service.StockRepository.StockOut(ctx, tx, stock)
+	product = service.StockRepository.StockOut(ctx, tx, product)
 
 	return helper.ToProductResponse(product, stock)
 }
@@ -248,7 +240,7 @@ func (service *ProductsServiceImpl) NullifyExpiredDateService(ctx context.Contex
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
 
-	stock = service.StockRepository.NullifyExpiredDate(ctx, tx, stock)
+	product = service.StockRepository.NullifyExpiredDate(ctx, tx, product)
 
 	return helper.ToProductResponse(product, stock)
 }

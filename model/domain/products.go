@@ -4,6 +4,7 @@ import "time"
 
 type Products struct {
 	SKU, Name, Brand, Category, ImageUrl string
-	Price                                int
+	Price, Amount                        int
+	ExpiredDate                          *time.Time
 	CreatedAt, UpdatedAt                 time.Time
 }

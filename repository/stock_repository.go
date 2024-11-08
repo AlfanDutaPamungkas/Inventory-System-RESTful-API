@@ -11,7 +11,7 @@ type StockRepository interface {
 	FindAll(ctx context.Context, tx *sql.Tx) []domain.ProductStock
 	FindBySKU(ctx context.Context, tx *sql.Tx, SKU string) (domain.ProductStock, error)
 	Update(ctx context.Context, tx *sql.Tx, stock domain.ProductStock) domain.ProductStock
-	StockOut(ctx context.Context, tx *sql.Tx, stock domain.ProductStock) domain.ProductStock
-	NullifyExpiredDate(ctx context.Context, tx *sql.Tx, stock domain.ProductStock) domain.ProductStock
+	StockOut(ctx context.Context, tx *sql.Tx, product domain.Products) domain.Products
+	NullifyExpiredDate(ctx context.Context, tx *sql.Tx, product domain.Products) domain.Products
 	Delete(ctx context.Context, tx *sql.Tx, SKU string)
 }
