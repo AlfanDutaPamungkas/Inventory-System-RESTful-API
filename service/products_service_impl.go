@@ -56,13 +56,7 @@ func (service *ProductsServiceImpl) CreateProductService(ctx context.Context, re
 
 	product = service.ProductsRepository.Create(ctx, tx, product)
 
-	stock := domain.ProductStock{
-		SKU:         request.SKU,
-		Amount:      request.Amount,
-		ExpiredDate: expDate,
-	}
-
-	return helper.ToProductResponse(product, stock)
+	return helper.ToProductResponse(product)
 }
 
 func (service *ProductsServiceImpl) FindAllService(ctx context.Context) []web.ProductResponse {
@@ -72,16 +66,10 @@ func (service *ProductsServiceImpl) FindAllService(ctx context.Context) []web.Pr
 
 	products := service.ProductsRepository.FindAll(ctx, tx)
 
-	stock := domain.ProductStock{
-		SKU:         "",
-		Amount:      0,
-		ExpiredDate: nil,
-	}
-
 	var productResponses []web.ProductResponse
 
 	for _, product := range products {
-		productResponse := helper.ToProductResponse(product, stock)
+		productResponse := helper.ToProductResponse(product)
 		productResponses = append(productResponses, productResponse)
 	}
 
@@ -98,12 +86,7 @@ func (service *ProductsServiceImpl) FindBySKUService(ctx context.Context, SKU st
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
 
-	stock, err := service.StockRepository.FindBySKU(ctx, tx, SKU)
-	if err != nil {
-		panic(exception.NewNotFoundErr(err.Error()))
-	}
-
-	return helper.ToProductResponse(product, stock)
+	return helper.ToProductResponse(product)
 }
 
 func (service *ProductsServiceImpl) UpdateProductService(ctx context.Context, request web.ProductUpdateReq) web.ProductResponse {
@@ -145,12 +128,7 @@ func (service *ProductsServiceImpl) UpdateProductService(ctx context.Context, re
 	}
 	product = service.ProductsRepository.Update(ctx, tx, product)
 
-	stock, err := service.StockRepository.FindBySKU(ctx, tx, request.SKU)
-	if err != nil {
-		panic(exception.NewNotFoundErr(err.Error()))
-	}
-
-	return helper.ToProductResponse(product, stock)
+	return helper.ToProductResponse(product)
 }
 
 func (service *ProductsServiceImpl) StockOutService(ctx context.Context, request web.StockAmountReq) web.ProductResponse {
@@ -163,11 +141,6 @@ func (service *ProductsServiceImpl) StockOutService(ctx context.Context, request
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
 
-	stock, err := service.StockRepository.FindBySKU(ctx, tx, request.SKU)
-	if err != nil {
-		panic(exception.NewNotFoundErr(err.Error()))
-	}
-
 	if request.Amount > product.Amount {
 		panic(exception.NewBadReqErr("the limit amount issued from stock is 0"))
 	}
@@ -176,7 +149,7 @@ func (service *ProductsServiceImpl) StockOutService(ctx context.Context, request
 
 	product = service.StockRepository.StockOut(ctx, tx, product)
 
-	return helper.ToProductResponse(product, stock)
+	return helper.ToProductResponse(product)
 }
 
 func (service *ProductsServiceImpl) StockInService(ctx context.Context, request web.StockAmountReq) web.ProductResponse {
@@ -189,27 +162,17 @@ func (service *ProductsServiceImpl) StockInService(ctx context.Context, request 
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
 
-	stock, err := service.StockRepository.FindBySKU(ctx, tx, request.SKU)
-	if err != nil {
-		panic(exception.NewNotFoundErr(err.Error()))
-	}
-
 	product.Amount = request.Amount
 
 	product = service.StockRepository.StockOut(ctx, tx, product)
 
-	return helper.ToProductResponse(product, stock)
+	return helper.ToProductResponse(product)
 }
 
 func (service *ProductsServiceImpl) UpdateImgUrlService(ctx context.Context, file multipart.File, fileHeader *multipart.FileHeader, SKU string) web.ProductResponse {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
-
-	stock, err := service.StockRepository.FindBySKU(ctx, tx, SKU)
-	if err != nil {
-		panic(exception.NewNotFoundErr(err.Error()))
-	}
 
 	product, err := service.ProductsRepository.FindBySKU(ctx, tx, SKU)
 	if err != nil {
@@ -222,18 +185,13 @@ func (service *ProductsServiceImpl) UpdateImgUrlService(ctx context.Context, fil
 
 	product = service.ProductsRepository.UpdateImgUrl(ctx, tx, product)
 
-	return helper.ToProductResponse(product, stock)
+	return helper.ToProductResponse(product)
 }
 
 func (service *ProductsServiceImpl) NullifyExpiredDateService(ctx context.Context, SKU string) web.ProductResponse {
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
-
-	stock, err := service.StockRepository.FindBySKU(ctx, tx, SKU)
-	if err != nil {
-		panic(exception.NewNotFoundErr(err.Error()))
-	}
 
 	product, err := service.ProductsRepository.FindBySKU(ctx, tx, SKU)
 	if err != nil {
@@ -242,7 +200,7 @@ func (service *ProductsServiceImpl) NullifyExpiredDateService(ctx context.Contex
 
 	product = service.StockRepository.NullifyExpiredDate(ctx, tx, product)
 
-	return helper.ToProductResponse(product, stock)
+	return helper.ToProductResponse(product)
 }
 
 func (service *ProductsServiceImpl) Delete(ctx context.Context, SKU string) string {
@@ -250,17 +208,11 @@ func (service *ProductsServiceImpl) Delete(ctx context.Context, SKU string) stri
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	_, err = service.StockRepository.FindBySKU(ctx, tx, SKU)
-	if err != nil {
-		panic(exception.NewNotFoundErr(err.Error()))
-	}
-
 	_, err = service.ProductsRepository.FindBySKU(ctx, tx, SKU)
 	if err != nil {
 		panic(exception.NewNotFoundErr(err.Error()))
 	}
 
-	service.StockRepository.Delete(ctx, tx, SKU)
 	service.ProductsRepository.Delete(ctx, tx, SKU)
 
 	return "product succesfully deleted"

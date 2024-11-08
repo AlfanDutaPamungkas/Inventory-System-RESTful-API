@@ -5,7 +5,7 @@ import (
 	"inventory-system-api/model/web"
 )
 
-func ToProductResponse(product domain.Products, stock domain.ProductStock) web.ProductResponse {
+func ToProductResponse(product domain.Products) web.ProductResponse {
 	return web.ProductResponse{
 		SKU:         product.SKU,
 		Name:        product.Name,

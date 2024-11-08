@@ -197,7 +197,11 @@ func (repository *ProductsRepositoryImpl) UpdateImgUrl(ctx context.Context, tx *
 }
 
 func (repository *ProductsRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, SKU string){
-	SQL := "DELETE FROM products WHERE SKU = ?"
+	SQL := "DELETE FROM product_stock WHERE SKU = ?"
 	_, err := tx.ExecContext(ctx, SQL, SKU)
+	helper.PanicError(err)
+	
+	SQL = "DELETE FROM products WHERE SKU = ?"
+	_, err = tx.ExecContext(ctx, SQL, SKU)
 	helper.PanicError(err)
 }
