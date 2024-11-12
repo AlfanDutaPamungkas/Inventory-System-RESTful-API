@@ -1,0 +1,2 @@
+ALTER TABLE product_stock
+DROP FOREIGN KEY fk_product_stock_products;

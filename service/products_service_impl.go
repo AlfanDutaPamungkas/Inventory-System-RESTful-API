@@ -35,7 +35,14 @@ func (service *ProductsServiceImpl) CreateProductService(ctx context.Context, re
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	imageUrl := helper.UploadImage(ctx, service.cld, file, fileHeader)
+	var imageUrl string;
+
+	if file != nil && fileHeader != nil {
+		imageUrl = helper.UploadImage(ctx, service.cld, file, fileHeader)
+	}else{
+		imageUrl = "";
+	}
+
 
 	var expDate *time.Time
 

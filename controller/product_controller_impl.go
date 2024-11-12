@@ -26,8 +26,12 @@ func NewProductsControllerImpl(productService service.ProductsService, logActivi
 
 func (controller *ProductsControllerImpl) CreateController(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	file, fileHeader, err := r.FormFile("Image")
-	helper.PanicError(err)
-	defer file.Close()
+	if err != nil {
+		file = nil
+		fileHeader = nil
+	} else {
+		defer file.Close()
+	}
 
 	productCreateReq := web.ProductCreateReq{}
 
