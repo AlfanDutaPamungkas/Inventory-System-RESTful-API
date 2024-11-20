@@ -33,7 +33,7 @@ func InitializedServer() *http.Server {
 	productsRepository := repository.NewProductsRepositoryImpl()
 	stockRepository := repository.NewStockRepositoryImpl()
 	cloudinary := app.NewCloudinary()
-	productsService := service.NewProductServiceImpl(db, productsRepository, stockRepository, cloudinary)
+	productsService := service.NewProductServiceImpl(db, productsRepository, stockRepository, cloudinary, validate)
 	productsController := controller.NewProductsControllerImpl(productsService, logActivityService)
 	logController := controller.NewLogControllerImpl(logActivityService)
 	router := app.NewRouter(usersController, productsController, logController)

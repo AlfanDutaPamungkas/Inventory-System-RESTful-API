@@ -138,12 +138,11 @@ func (service *UsersServiceImpl) UpdateAdminAccService(ctx context.Context, requ
 }
 
 func (service *UsersServiceImpl) FindAllAdminAccService(ctx context.Context) []web.UsersResponse {
-	queries := ctx.Value("queries")
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	users := service.UserRepository.FindAll(ctx, tx, queries.(map[string]string))
+	users := service.UserRepository.FindAll(ctx, tx)
 
 	var userResponses []web.UsersResponse
 	for _, user := range users {

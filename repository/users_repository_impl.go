@@ -72,18 +72,17 @@ func (repository *UsersRepositoryImpl) UpdateAdminAcc(ctx context.Context, tx *s
 	return user
 }
 
-func (repository *UsersRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx, queries map[string]string) []domain.Users {
+func (repository *UsersRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Users {
+	queries := ctx.Value("queries").(map[string]string)
 	var rows *sql.Rows
 	var err error
 
 	if queries["status"] != "" && queries["name"] != ""{
-		SQL := "SELECT id, name, email, role, status, created_at, updated_at FROM users WHERE name LIKE ? AND status = ?"
-		searchPattern := "%" + queries["name"] + "%"
-		rows, err = tx.QueryContext(ctx, SQL, searchPattern, queries["status"])
+		SQL := "SELECT id, name, email, role, status, created_at, updated_at FROM users WHERE  MATCH (name) AGAINST (? IN NATURAL LANGUAGE MODE) AND status = ?"
+		rows, err = tx.QueryContext(ctx, SQL, queries["name"], queries["status"])
 	}else if queries["name"] != "" {
-		SQL := "SELECT id, name, email, role, status, created_at, updated_at FROM users WHERE name LIKE ?"
-		searchPattern := "%" + queries["name"] + "%"
-		rows, err = tx.QueryContext(ctx, SQL, searchPattern)
+		SQL := "SELECT id, name, email, role, status, created_at, updated_at FROM users WHERE MATCH (name) AGAINST (? IN NATURAL LANGUAGE MODE)"
+		rows, err = tx.QueryContext(ctx, SQL, queries["name"])
 	} else if queries["status"] != "" {
 		SQL := "SELECT id, name, email, role, status, created_at, updated_at FROM users where status = ?"
 		rows, err = tx.QueryContext(ctx, SQL, queries["status"])

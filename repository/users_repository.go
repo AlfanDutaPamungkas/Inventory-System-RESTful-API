@@ -11,7 +11,7 @@ type UsersRepository interface {
 	FindByEmail(ctx context.Context, tx *sql.Tx, email string) (domain.Users, error)
 	FindById(ctx context.Context, tx *sql.Tx, id string) (domain.Users, error)
 	UpdateAdminAcc(ctx context.Context, tx *sql.Tx, user domain.Users) domain.Users
-	FindAll(ctx context.Context, tx *sql.Tx, queries map[string]string) []domain.Users
+	FindAll(ctx context.Context, tx *sql.Tx) []domain.Users
 	DeactiveAdmin(ctx context.Context, tx *sql.Tx, id string) domain.Users
 	ChangePassword(ctx context.Context, tx *sql.Tx, user domain.Users)
 }

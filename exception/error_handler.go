@@ -131,10 +131,17 @@ func internalServerError(w http.ResponseWriter, r *http.Request, err any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
 
+	var message string
+    if e, ok := err.(error); ok {
+        message = e.Error()
+    } else {
+        message = "An unexpected error occurred"
+    }
+
 	response := web.WebResponse{
 		Code: http.StatusInternalServerError,
 		Status: "INTERNAL SERVER ERROR",
-		Data: err,
+		Data: message,
 	}
 
 	helper.WriteToBody(w, response)

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/go-playground/validator/v10"
 )
 
 type ProductsServiceImpl struct {
@@ -19,30 +20,34 @@ type ProductsServiceImpl struct {
 	ProductsRepository repository.ProductsRepository
 	StockRepository    repository.StockRepository
 	cld                *cloudinary.Cloudinary
+	Validate           *validator.Validate
 }
 
-func NewProductServiceImpl(DB *sql.DB, productsRepository repository.ProductsRepository, stockRepository repository.StockRepository, cld *cloudinary.Cloudinary) ProductsService {
+func NewProductServiceImpl(DB *sql.DB, productsRepository repository.ProductsRepository, stockRepository repository.StockRepository, cld *cloudinary.Cloudinary, validate *validator.Validate) ProductsService {
 	return &ProductsServiceImpl{
 		DB:                 DB,
 		ProductsRepository: productsRepository,
 		StockRepository:    stockRepository,
 		cld:                cld,
+		Validate:           validate,
 	}
 }
 
 func (service *ProductsServiceImpl) CreateProductService(ctx context.Context, request web.ProductCreateReq, file multipart.File, fileHeader *multipart.FileHeader) web.ProductResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
 
-	var imageUrl string;
+	var imageUrl string
 
 	if file != nil && fileHeader != nil {
 		imageUrl = helper.UploadImage(ctx, service.cld, file, fileHeader)
-	}else{
-		imageUrl = "";
+	} else {
+		imageUrl = ""
 	}
-
 
 	var expDate *time.Time
 
@@ -51,13 +56,13 @@ func (service *ProductsServiceImpl) CreateProductService(ctx context.Context, re
 	}
 
 	product := domain.Products{
-		SKU:      request.SKU,
-		Name:     request.Name,
-		Brand:    request.Brand,
-		Category: request.Category,
-		ImageUrl: imageUrl,
-		Price:    request.Price,
-		Amount: request.Amount,
+		SKU:         request.SKU,
+		Name:        request.Name,
+		Brand:       request.Brand,
+		Category:    request.Category,
+		ImageUrl:    imageUrl,
+		Price:       request.Price,
+		Amount:      request.Amount,
 		ExpiredDate: expDate,
 	}
 
@@ -97,6 +102,9 @@ func (service *ProductsServiceImpl) FindBySKUService(ctx context.Context, SKU st
 }
 
 func (service *ProductsServiceImpl) UpdateProductService(ctx context.Context, request web.ProductUpdateReq) web.ProductResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
@@ -139,6 +147,9 @@ func (service *ProductsServiceImpl) UpdateProductService(ctx context.Context, re
 }
 
 func (service *ProductsServiceImpl) StockOutService(ctx context.Context, request web.StockAmountReq) web.ProductResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
@@ -160,6 +171,9 @@ func (service *ProductsServiceImpl) StockOutService(ctx context.Context, request
 }
 
 func (service *ProductsServiceImpl) StockInService(ctx context.Context, request web.StockAmountReq) web.ProductResponse {
+	err := service.Validate.Struct(request)
+	helper.PanicError(err)
+
 	tx, err := service.DB.Begin()
 	helper.PanicError(err)
 	defer helper.CommitOrRollback(tx)
