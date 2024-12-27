@@ -38,7 +38,7 @@ The Inventory System is a RESTful API built using Golang, designed to manage pro
     ```
 5. Start the server:
     ```bash
-    go run main.go
+    go run .
     ```
     The API will be running at `http://localhost:3000`.
 
